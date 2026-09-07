@@ -1,7 +1,22 @@
-<div align="center">
-  <img src="./icon.svg" alt="Privo Logo" width="80" height="80" />
-  <h1>Privo Page Agent — Backend</h1>
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/soumikk01/Privo_Extension_Backend/main/icon.svg" alt="Privo Logo" width="90" height="90" />
+</p>
+
+<h1 align="center">Privo Page Agent — Backend</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D18-brightgreen?style=flat-square&logo=node.js" alt="Node.js" />
+  <img src="https://img.shields.io/badge/Fastify-v5-black?style=flat-square&logo=fastify" alt="Fastify" />
+  <img src="https://img.shields.io/badge/TypeScript-ESM-blue?style=flat-square&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Port-8787-orange?style=flat-square" alt="Port" />
+</p>
+
+<p align="center">
+  Privacy-first backend for the <strong>Privo Page Agent</strong> Chrome extension.<br/>
+  Secures your Anthropic API key server-side and provides tamper-proof capture verification.
+</p>
+
+---
 
 The backend server for the **Privo Page Agent** Chrome extension. It has two responsibilities:
 
