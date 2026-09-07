@@ -1,6 +1,9 @@
-# Deccan Page Agent — Backend
+<div align="center">
+  <img src="./icon.svg" alt="Privo Logo" width="80" height="80" />
+  <h1>Privo Page Agent — Backend</h1>
+</div>
 
-The backend server for the Deccan Page Agent Chrome extension. It has two responsibilities:
+The backend server for the **Privo Page Agent** Chrome extension. It has two responsibilities:
 
 1. **LLM proxy** — forwards requests from the extension to the Anthropic API, keeping the API key server-side and never in the browser
 2. **Capture registry** — stores SHA-256 hashes of sealed page captures with HMAC signatures, enabling tamper-detection: any pixel change after sealing breaks verification
@@ -31,7 +34,7 @@ Built with [Fastify v5](https://fastify.dev/), TypeScript (ESM), Zod for schema 
 
 ## How it relates to the extension
 
-The Chrome extension (`deccan-page-agent`) talks to this backend over HTTP on `localhost:8787`:
+The Chrome extension (`privo-page-agent`) talks to this backend over HTTP on `localhost:8787`:
 
 ```text
 Extension (side panel)
@@ -57,7 +60,7 @@ No authentication required. Returns the current service state.
 ```json
 {
   "ok": true,
-  "service": "deccan-capture",
+  "service": "privo-capture",
   "captures": 42,
   "llmProxy": true,
   "authRequired": true,
@@ -100,7 +103,7 @@ Registers a sealed capture. Idempotent — if the SHA-256 is already registered,
 {
   "sha256": "a3f1b2c4d5e6...",
   "meta": {
-    "captureId": "DC-260826-A1B2C3D4",
+    "captureId": "PV-260826-A1B2C3D4",
     "url": "https://example.com/orders/12345",
     "title": "My Orders — Example Store",
     "capturedAt": 1724651234567,
@@ -112,7 +115,7 @@ Registers a sealed capture. Idempotent — if the SHA-256 is already registered,
 | Field | Type | Validation | Description |
 |---|---|---|---|
 | `sha256` | string | `/^[0-9a-f]{64}$/` | SHA-256 hex of the sealed PNG |
-| `meta.captureId` | string | 1–40 chars | Capture ID in `DC-YYMMDD-XXXXXXXX` format |
+| `meta.captureId` | string | 1–40 chars | Capture ID in `PV-YYMMDD-XXXXXXXX` format |
 | `meta.url` | string | valid URL, max 2000 chars | Page URL at time of capture |
 | `meta.title` | string | max 300 chars, optional | Page `<title>` at time of capture |
 | `meta.capturedAt` | number | integer, optional | Epoch milliseconds when the capture was taken |
@@ -125,7 +128,7 @@ Registers a sealed capture. Idempotent — if the SHA-256 is already registered,
 ```json
 {
   "sha256": "a3f1b2c4d5e6...",
-  "captureId": "DC-260826-A1B2C3D4",
+  "captureId": "PV-260826-A1B2C3D4",
   "url": "https://example.com/orders/12345",
   "title": "My Orders — Example Store",
   "capturedAt": 1724651234567,
@@ -158,7 +161,7 @@ No authentication required. This is the public verification endpoint — anyone 
   "valid": true,
   "record": {
     "sha256": "a3f1b2c4d5e6...",
-    "captureId": "DC-260826-A1B2C3D4",
+    "captureId": "PV-260826-A1B2C3D4",
     "url": "https://example.com/orders/12345",
     "title": "My Orders — Example Store",
     "capturedAt": 1724651234567,
@@ -321,7 +324,7 @@ No `arrayBuffer()` buffering — the first token reaches the extension immediate
 ```typescript
 type CaptureRecord = {
   sha256: string       // 64 hex chars — SHA-256 of the sealed PNG
-  captureId: string    // DC-YYMMDD-XXXXXXXX
+  captureId: string    // PV-YYMMDD-XXXXXXXX
   url: string          // page URL (max 2000 chars)
   title: string        // page <title> (max 300 chars)
   capturedAt: number | null  // epoch ms, or null if timestamp was invalid
@@ -335,7 +338,7 @@ The file is a JSON object keyed by `sha256`:
 
 ```json
 {
-  "a3f1b2...": { "sha256": "a3f1b2...", "captureId": "DC-260826-A1B2C3D4", ... },
+  "a3f1b2...": { "sha256": "a3f1b2...", "captureId": "PV-260826-A1B2C3D4", ... },
   "9d8c7e...": { "sha256": "9d8c7e...", ... }
 }
 ```
@@ -486,7 +489,7 @@ The server refuses to start in production without a configured secret. In develo
 ## Project layout (every file explained)
 
 ```text
-deccan-page-agent-ext-be/
+privo-page-agent-ext-be/
 │
 ├── src/
 │   │
@@ -524,6 +527,7 @@ deccan-page-agent-ext-be/
 │   ├── index.js
 │   └── validate-page.js
 │
+├── icon.svg                  Privo logo
 ├── package.json              Dependencies + scripts (dev/build/start/typecheck)
 ├── tsconfig.json             TypeScript config (ESNext, NodeNext modules)
 └── .env                      Secrets — NEVER commit (gitignored)
@@ -545,17 +549,17 @@ npm install
 
 ### 2. Configure `.env`
 
-`.env` has pre-generated values for `EXTENSION_SECRET` and `SIGNING_SECRET`. Add your Anthropic API key:
+Copy `.env.example` to `.env` and fill in your Anthropic API key:
 
 ```env
-# Fresh key from console.anthropic.com (old key was revoked)
+# Fresh key from console.anthropic.com
 ANTHROPIC_API_KEY=sk-ant-api03-...
 
 # Must match VITE_EXTENSION_SECRET in the extension's .env
-EXTENSION_SECRET=3b83162a41031b5947d3df95d36d2b501ebdde57c57bcc4e55ba19d3e7e1737a
+EXTENSION_SECRET=your-generated-secret
 
 # HMAC signing key — keep stable across restarts
-SIGNING_SECRET=061da09a54fe44689119af824f3669d5557c7624e4ee396c05b1c55ee16724f0
+SIGNING_SECRET=your-generated-signing-secret
 
 PORT=8787
 ```
@@ -577,7 +581,7 @@ Copy that value into `.env` — otherwise a server restart invalidates all exist
 grep EXTENSION_SECRET .env
 
 # Extension repo:
-grep VITE_EXTENSION_SECRET ../deccan-page-agent/.env
+grep VITE_EXTENSION_SECRET ../privo-page-agent/.env
 ```
 
 The values after `=` must be identical.
@@ -605,10 +609,10 @@ The values after `=` must be identical.
 npm run dev
 ```
 
-Uses `nodemon` watching `src/` for `.ts` and `.json` changes. On change: kills the previous process and restarts with `tsx src/index.ts`. No compilation step — `tsx` transpiles on-the-fly.
+Uses `nodemon` watching `src/` and `.env` for changes. On change: kills the previous process and restarts with `tsx src/index.ts`. No compilation step — `tsx` transpiles on-the-fly.
 
 ```
-Deccan Capture backend  →  http://localhost:8787
+Privo Capture backend  →  http://localhost:8787
   LLM proxy    /v1/*   →  https://api.anthropic.com (key loaded)
   Registry     /captures  (0 record(s))
   Validator    http://localhost:8787/validate
@@ -627,7 +631,7 @@ Set `NODE_ENV=production` before starting. A process manager like PM2 is recomme
 
 ```bash
 npm install -g pm2
-NODE_ENV=production pm2 start dist/index.js --name deccan-capture
+NODE_ENV=production pm2 start dist/index.js --name privo-capture
 pm2 save
 pm2 startup
 ```
@@ -642,7 +646,7 @@ npm run typecheck
 
 ## Secret management
 
-### How secrets are generated (how we generated yours)
+### How secrets are generated
 
 Both secrets were generated with:
 
@@ -669,7 +673,7 @@ Rotating means temporarily breaking the extension until you rebuild it. Steps:
 2. Update `EXTENSION_SECRET` in this repo's `.env`
 3. Update `VITE_EXTENSION_SECRET` in the extension repo's `.env`
 4. Restart the backend: `npm run dev` (or restart the PM2 process)
-5. Rebuild the extension: `yarn build` (in `deccan-page-agent`)
+5. Rebuild the extension: `yarn build` (in `privo-page-agent`)
 6. Reload the extension in Chrome (`chrome://extensions` → reload icon)
 
 ### Rotating `SIGNING_SECRET`
